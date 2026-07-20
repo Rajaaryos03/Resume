@@ -137,7 +137,7 @@ export default function ExperienceForm({ experience }: ExperienceFormProps) {
             {isPending && <Loader2 size={15} className="animate-spin" aria-hidden="true" />}
             {isPending ? "Saving…" : experience ? "Update Experience" : "Add Experience"}
           </button>
-          <Link href="/admin/experience" className="inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#1E293B] transition-colors min-h-[44px]">Cancel</Link>
+          <Link href="/admin/experience" className="inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-white/10 hover:bg-white/20 text-white transition-colors min-h-[44px]">Cancel</Link>
         </div>
       </form>
     </div>

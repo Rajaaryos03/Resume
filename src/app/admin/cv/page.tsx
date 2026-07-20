@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import CVForm from "@/components/admin/CVForm";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Manage CV" };
 
 export default async function AdminCVPage() {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data: cvList } = await supabase
     .from("cv")
     .select("*")

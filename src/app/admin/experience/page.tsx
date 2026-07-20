@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PlusCircle, Pencil } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import Badge from "@/components/ui/Badge";
 import { formatMonthYear } from "@/lib/utils";
 import DeleteButton from "@/components/admin/DeleteButton";
@@ -10,7 +10,7 @@ import { deleteExperience } from "@/lib/actions";
 export const metadata: Metadata = { title: "Manage Experience" };
 
 export default async function AdminExperiencePage() {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data: experiences } = await supabase
     .from("experience")
     .select("id, role_title, company, start_date, end_date, is_current_role, status")

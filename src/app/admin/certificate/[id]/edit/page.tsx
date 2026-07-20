@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import CertificateForm from "@/components/admin/CertificateForm";
 import type { Certificate } from "@/types";
 
 export default async function EditCertificatePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data } = await supabase.from("certificate").select("*").eq("id", id).single();
   if (!data) notFound();
 

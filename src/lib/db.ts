@@ -84,6 +84,8 @@ export async function getPublishedExperiences(): Promise<Experience[]> {
     .from("experience")
     .select("*")
     .eq("status", "published")
+    .order("sort_order", { ascending: true })
+    .order("is_current_role", { ascending: false })
     .order("start_date", { ascending: false });
   return (data ?? []).map(mapExperience);
 }

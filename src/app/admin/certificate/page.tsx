@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PlusCircle, Pencil } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import Badge from "@/components/ui/Badge";
 import { formatMonthYear } from "@/lib/utils";
 import DeleteButton from "@/components/admin/DeleteButton";
@@ -10,7 +10,7 @@ import { deleteCertificate } from "@/lib/actions";
 export const metadata: Metadata = { title: "Manage Certificates" };
 
 export default async function AdminCertificatePage() {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data: certs } = await supabase
     .from("certificate")
     .select("id, certificate_name, issuer, issue_date, category, status")

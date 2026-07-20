@@ -107,7 +107,7 @@ export default function BlogForm({ blog }: BlogFormProps) {
               required
               value={slug}
               onChange={(e) => { setSlug(e.target.value); setSlugManual(true); }}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E2E8F0] text-sm text-[#1E293B] font-mono focus:outline-none focus:ring-2 focus:ring-[#2F80ED] focus:border-transparent transition"
+              className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm font-mono focus:outline-none transition"
               placeholder="my-power-platform-tutorial"
             />
             <p className="text-xs text-slate-500 mt-1">URL: /blog/{slug || "slug"}</p>
@@ -124,7 +124,7 @@ export default function BlogForm({ blog }: BlogFormProps) {
               required
               rows={2}
               defaultValue={blog?.excerpt ?? ""}
-              className="w-full px-3.5 py-2.5 rounded-lg border border-[#E2E8F0] text-sm text-[#1E293B] resize-none focus:outline-none focus:ring-2 focus:ring-[#2F80ED] focus:border-transparent transition"
+              className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm resize-none focus:outline-none transition"
               placeholder="A short summary of this post…"
             />
           </div>
@@ -200,9 +200,9 @@ export default function BlogForm({ blog }: BlogFormProps) {
 
         {/* Content */}
         <div className="admin-card p-5 sm:p-6">
-          <label htmlFor="content" className="block text-sm font-semibold text-[#1E293B] mb-3">
+          <label htmlFor="content" className="block text-sm font-semibold text-white mb-3">
             Content <span className="text-red-500" aria-hidden="true">*</span>
-            <span className="text-xs text-[#94A3B8] font-normal ml-2">(HTML supported)</span>
+            <span className="text-xs text-slate-400 font-normal ml-2">(HTML supported)</span>
           </label>
           <textarea
             id="content"
@@ -210,7 +210,7 @@ export default function BlogForm({ blog }: BlogFormProps) {
             required
             rows={20}
             defaultValue={blog?.content ?? ""}
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#E2E8F0] text-sm text-[#1E293B] font-mono resize-y focus:outline-none focus:ring-2 focus:ring-[#2F80ED] focus:border-transparent transition"
+            className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm font-mono resize-y focus:outline-none transition"
             placeholder="<p>Write your blog content here…</p>"
           />
         </div>
@@ -227,7 +227,7 @@ export default function BlogForm({ blog }: BlogFormProps) {
           </button>
           <Link
             href="/admin/blog"
-            className="inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#1E293B] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#94A3B8] min-h-[44px]"
+            className="inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-white/10 hover:bg-white/20 text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 min-h-[44px]"
           >
             Cancel
           </Link>

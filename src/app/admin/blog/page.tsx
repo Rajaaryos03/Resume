@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PlusCircle, Pencil } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import Badge from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
 import DeleteButton from "@/components/admin/DeleteButton";
@@ -10,7 +10,7 @@ import { deleteBlog } from "@/lib/actions";
 export const metadata: Metadata = { title: "Manage Blog" };
 
 export default async function AdminBlogListPage() {
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data: blogs } = await supabase
     .from("blog")
     .select("id, title, category, status, published_at, created_at")

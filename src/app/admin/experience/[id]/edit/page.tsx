@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import ExperienceForm from "@/components/admin/ExperienceForm";
 import type { Experience } from "@/types";
 
 export default async function EditExperiencePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const supabase = await createAdminClient();
   const { data } = await supabase.from("experience").select("*").eq("id", id).single();
   if (!data) notFound();
 
