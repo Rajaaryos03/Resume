@@ -37,43 +37,54 @@ function LoginForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-[16px] p-6 shadow-xl"
+      className="bg-[#1E293B] border border-white/10 rounded-[16px] p-6 shadow-xl"
       aria-label="Admin login form"
     >
       <div className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-semibold text-[#1E293B] mb-1.5">Email</label>
+          <label htmlFor="email" className="block text-sm font-semibold text-white mb-1.5">
+            Email
+          </label>
           <input
-            id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+            id="email" type="email" value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required autoComplete="email"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-[#E2E8F0] text-sm text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#2F80ED] focus:border-transparent transition"
+            className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none transition"
             placeholder="admin@email.com"
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-semibold text-[#1E293B] mb-1.5">Password</label>
+          <label htmlFor="password" className="block text-sm font-semibold text-white mb-1.5">
+            Password
+          </label>
           <div className="relative">
             <input
               id="password" type={showPw ? "text" : "password"} value={password}
-              onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password"
-              className="w-full px-3.5 py-2.5 pr-10 rounded-lg border border-[#E2E8F0] text-sm text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#2F80ED] focus:border-transparent transition"
+              onChange={(e) => setPassword(e.target.value)}
+              required autoComplete="current-password"
+              className="admin-input w-full px-3.5 py-2.5 pr-10 rounded-lg border text-sm focus:outline-none transition"
               placeholder="••••••••"
             />
-            <button type="button" onClick={() => setShowPw(!showPw)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#64748B]"
-              aria-label={showPw ? "Hide password" : "Show password"}>
+            <button
+              type="button" onClick={() => setShowPw(!showPw)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              aria-label={showPw ? "Hide password" : "Show password"}
+            >
               {showPw ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
             </button>
           </div>
         </div>
+
         {error && (
-          <div role="alert" className="bg-red-50 border border-red-200 rounded-lg px-4 py-2.5 text-sm text-red-700">
+          <div role="alert" className="bg-red-500/15 border border-red-500/30 rounded-lg px-4 py-2.5 text-sm text-red-400">
             {error}
           </div>
         )}
+
         <button
           type="submit" disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-[#2F80ED] hover:bg-[#2563EB] text-white font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-60 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F80ED] focus-visible:ring-offset-2 min-h-[44px]"
+          className="w-full flex items-center justify-center gap-2 bg-[#2F80ED] hover:bg-[#2563EB] text-white font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-60 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F80ED] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1E293B] min-h-[44px]"
+          style={{ color: "#ffffff" }}
         >
           {loading && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
           {loading ? "Signing in…" : "Sign In"}
@@ -93,7 +104,7 @@ export default function LoginPage() {
           </h1>
           <p className="text-slate-400 text-sm">Sign in to manage your portfolio</p>
         </div>
-        <Suspense fallback={<div className="bg-white rounded-[16px] p-6 shadow-xl h-48 animate-pulse" />}>
+        <Suspense fallback={<div className="bg-[#1E293B] border border-white/10 rounded-[16px] p-6 h-48 animate-pulse" />}>
           <LoginForm />
         </Suspense>
       </div>

@@ -13,7 +13,7 @@ interface BlogCardProps {
 export default function BlogCard({ blog, featured }: BlogCardProps) {
   return (
     <article
-      className={`bg-white rounded-[10px] border border-[#E2E8F0] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex ${
+      className={`bg-white/5 border border-white/10 rounded-[10px] hover:bg-white/8 hover:border-white/20 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden flex ${
         featured ? "flex-col sm:flex-row" : "flex-col"
       } h-full`}
     >
@@ -36,12 +36,12 @@ export default function BlogCard({ blog, featured }: BlogCardProps) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-4xl font-bold text-[#2F80ED]/30" aria-hidden="true">
+            <span className="text-4xl font-bold text-[#2F80ED]/40" aria-hidden="true">
               {blog.category.slice(0, 2)}
             </span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" aria-hidden="true" />
       </Link>
 
       {/* Content */}
@@ -49,7 +49,7 @@ export default function BlogCard({ blog, featured }: BlogCardProps) {
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <Badge variant="default">{blog.category}</Badge>
           {blog.tags.slice(0, 2).map((tag) => (
-            <span key={tag} className="flex items-center gap-1 text-xs text-[#94A3B8]">
+            <span key={tag} className="flex items-center gap-1 text-xs text-slate-400">
               <Tag size={10} aria-hidden="true" />
               {tag}
             </span>
@@ -58,7 +58,7 @@ export default function BlogCard({ blog, featured }: BlogCardProps) {
 
         <Link href={`/blog/${blog.slug}`} className="group flex-1">
           <h3
-            className={`font-bold text-[#1E293B] group-hover:text-[#2F80ED] transition-colors leading-snug mb-2 ${
+            className={`font-bold text-white group-hover:text-[#56CCF2] transition-colors leading-snug mb-2 ${
               featured ? "text-xl" : "text-base"
             }`}
             style={{ fontFamily: "var(--font-heading)" }}
@@ -67,11 +67,11 @@ export default function BlogCard({ blog, featured }: BlogCardProps) {
           </h3>
         </Link>
 
-        <p className="text-sm text-[#64748B] leading-relaxed mb-4 line-clamp-3">
+        <p className="text-sm text-slate-400 leading-relaxed mb-4 line-clamp-3">
           {blog.excerpt}
         </p>
 
-        <div className="flex items-center gap-4 text-xs text-[#94A3B8] mt-auto">
+        <div className="flex items-center gap-4 text-xs text-slate-500 mt-auto">
           {blog.publishedAt && (
             <span className="flex items-center gap-1">
               <Calendar size={11} aria-hidden="true" />
