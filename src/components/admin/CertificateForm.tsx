@@ -76,7 +76,7 @@ export default function CertificateForm({ certificate }: { certificate?: Certifi
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="credentialId" className="block text-sm font-semibold text-white mb-1.5">Credential ID</label>
-              <input id="credentialId" name="credentialId" type="text" defaultValue={certificate?.credentialId ?? ""} className="w-full px-3.5 py-2.5 rounded-lg border border-[#E2E8F0] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#2F80ED] focus:border-transparent transition" placeholder="ABC123XYZ" />
+              <input id="credentialId" name="credentialId" type="text" defaultValue={certificate?.credentialId ?? ""} className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm font-mono focus:outline-none transition" placeholder="ABC123XYZ" />
             </div>
             <div>
               <label htmlFor="credentialUrl" className="block text-sm font-semibold text-white mb-1.5">Credential URL</label>
@@ -96,7 +96,7 @@ export default function CertificateForm({ certificate }: { certificate?: Certifi
 
           <div>
             <label htmlFor="status" className="block text-sm font-semibold text-white mb-1.5">Status</label>
-            <select id="status" name="status" defaultValue={certificate?.status ?? "published"} className="w-full sm:w-48 px-3.5 py-2.5 rounded-lg border border-[#E2E8F0] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2F80ED] focus:border-transparent transition">
+            <select id="status" name="status" defaultValue={certificate?.status ?? "published"} className="admin-input w-full sm:w-48 px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none transition">
               <option value="published">Published</option>
               <option value="hidden">Hidden</option>
             </select>
@@ -108,7 +108,7 @@ export default function CertificateForm({ certificate }: { certificate?: Certifi
             {isPending && <Loader2 size={15} className="animate-spin" aria-hidden="true" />}
             {isPending ? "Saving…" : certificate ? "Update Certificate" : "Add Certificate"}
           </button>
-          <Link href="/admin/certificate" className="inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#1E293B] transition-colors min-h-[44px]">Cancel</Link>
+          <Link href="/admin/certificate" className="inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-white/10 hover:bg-white/20 text-white transition-colors min-h-[44px]">Cancel</Link>
         </div>
       </form>
     </div>
