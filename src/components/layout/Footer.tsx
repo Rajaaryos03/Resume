@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Mail, ExternalLink } from "lucide-react";
+import { getProfile } from "@/lib/db";
 
 function LinkedInIcon({ size = 18 }: { size?: number }) {
   return (
@@ -19,8 +20,9 @@ function GitHubIcon({ size = 18 }: { size?: number }) {
   );
 }
 
-export default function Footer() {
+export default async function Footer() {
   const year = new Date().getFullYear();
+  const profile = await getProfile();
 
   return (
     <footer className="bg-[#0B1F3A] text-slate-400 py-10 mt-auto">
@@ -34,44 +36,54 @@ export default function Footer() {
             >
               Raja<span className="text-[#2F80ED]">.</span>dev
             </Link>
-            <p className="text-sm mt-1">Power Platform Developer · Indonesia</p>
+            <p className="text-sm mt-1">
+              {profile?.professionalTitle?.split("|")[0]?.trim() ?? "Power Platform Developer"} · {profile?.location ?? "Indonesia"}
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <a
-              href="mailto:rajaaryos@email.com"
-              aria-label="Email"
-              className="p-2 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
-            >
-              <Mail size={18} aria-hidden="true" />
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-              className="p-2 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
-            >
-              <LinkedInIcon size={18} />
-            </a>
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub"
-              className="p-2 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
-            >
-              <GitHubIcon size={18} />
-            </a>
-            <a
-              href="https://learn.microsoft.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Microsoft Learn"
-              className="p-2 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
-            >
-              <ExternalLink size={18} aria-hidden="true" />
-            </a>
+            {profile?.email && (
+              <a
+                href={`mailto:${profile.email}`}
+                aria-label="Email"
+                className="p-2 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <Mail size={18} aria-hidden="true" />
+              </a>
+            )}
+            {profile?.linkedInUrl && (
+              <a
+                href={profile.linkedInUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="p-2 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <LinkedInIcon size={18} />
+              </a>
+            )}
+            {profile?.githubUrl && (
+              <a
+                href={profile.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="p-2 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <GitHubIcon size={18} />
+              </a>
+            )}
+            {profile?.microsoftLearnUrl && (
+              <a
+                href={profile.microsoftLearnUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Microsoft Learn"
+                className="p-2 rounded-lg hover:bg-white/10 hover:text-white transition-colors"
+              >
+                <ExternalLink size={18} aria-hidden="true" />
+              </a>
+            )}
           </div>
         </div>
         <div className="mt-6 pt-6 border-t border-white/10 text-center text-xs text-slate-500">

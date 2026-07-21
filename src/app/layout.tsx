@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import PublicShell from "@/components/layout/PublicShell";
+import Footer from "@/components/layout/Footer";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Raja Aryos" }],
   creator: "Raja Aryos",
+  metadataBase: new URL("https://rajaaryos.dev"),
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -62,7 +64,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col" style={{ fontFamily: "var(--font-body)" }}>
-        <PublicShell>{children}</PublicShell>
+        <PublicShell footer={<Footer />}>{children}</PublicShell>
         <Toaster
           position="top-right"
           toastOptions={{

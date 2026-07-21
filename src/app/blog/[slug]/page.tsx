@@ -2,11 +2,18 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Calendar, Clock, Tag } from "lucide-react";
-import { getBlogBySlug, getFeaturedBlogs } from "@/lib/db";
+import { ArrowLeft, Calendar, Clock, Tag, Eye } from "lucide-react";
+import { getBlogBySlug, getRelatedBlogs, getSeriesByBlogId } from "@/lib/db";
 import { formatDate, calcReadingTime } from "@/lib/utils";
 import Badge from "@/components/ui/Badge";
 import BlogCard from "@/components/blog/BlogCard";
+import ViewCounter from "@/components/blog/ViewCounter";
+import DOMPurify from "isomorphic-dompurify";
+import BlogReactions from "@/components/blog/BlogReactions";
+import BlogComments from "@/components/blog/BlogComments";
+import ShareButtons from "@/components/blog/ShareButtons";
+import ReadingProgressBar from "@/components/blog/ReadingProgressBar";
+import BlogSeriesNav from "@/components/blog/BlogSeriesNav";
 
 interface BlogDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -23,26 +30,34 @@ export async function generateMetadata({ params }: BlogDetailPageProps): Promise
       title: blog.title,
       description: blog.excerpt,
       type: "article",
-      publishedTime: blog.publishedAt,
-      images: blog.coverImageUrl ? [blog.coverImageUrl] : [],
+      publishedTime: blog.publishedAt ?? undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: blog.title,
+      description: blog.excerpt,
     },
   };
 }
 
 export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   const { slug } = await params;
-  const [blog, related] = await Promise.all([
-    getBlogBySlug(slug),
-    getFeaturedBlogs(3),
-  ]);
+  const blog = await getBlogBySlug(slug);
 
   if (!blog) notFound();
 
+  const [related, series] = await Promise.all([
+    getRelatedBlogs(slug, blog.category, 3),
+    getSeriesByBlogId(blog.id),
+  ]);
+
   const readingTime = calcReadingTime(blog.content);
-  const relatedPosts = related.filter((b) => b.id !== blog.id).slice(0, 2);
+  const relatedPosts = related.slice(0, 2);
 
   return (
     <div className="pt-24 pb-16 min-h-screen bg-[#F8FAFC]">
+      <ReadingProgressBar />
+      <ViewCounter slug={blog.slug} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Back */}
         <Link
@@ -89,6 +104,10 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
               <Clock size={14} aria-hidden="true" />
               {readingTime} min read
             </span>
+            <span className="flex items-center gap-1.5">
+              <Eye size={14} aria-hidden="true" />
+              {blog.viewCount.toLocaleString()} views
+            </span>
             <span className="text-xs font-semibold text-[#2F80ED] uppercase tracking-wide">
               Raja Aryos
             </span>
@@ -108,12 +127,24 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
             </div>
           )}
 
+          {/* Series navigation — shown above content */}
+          {series && <BlogSeriesNav series={series} currentSlug={blog.slug} />}
+
           {/* Content */}
           <div
             className="prose max-w-none"
-            dangerouslySetInnerHTML={{ __html: blog.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
           />
+
+          {/* Reactions + Share */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 border-t border-[#E2E8F0]">
+            <BlogReactions slug={blog.slug} />
+            <ShareButtons title={blog.title} slug={blog.slug} />
+          </div>
         </article>
+
+        {/* Comments */}
+        <BlogComments slug={blog.slug} />
 
         {/* Related posts */}
         {relatedPosts.length > 0 && (

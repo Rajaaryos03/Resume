@@ -36,6 +36,7 @@ export interface Profile {
   githubUrl?: string;
   microsoftLearnUrl?: string;
   profileImageUrl?: string;
+  availabilityStatus?: string;
   skills: string[];
   createdAt: string;
   updatedAt: string;
@@ -52,6 +53,9 @@ export interface Blog {
   coverImageUrl?: string;
   status: BlogStatus;
   publishedAt?: string;
+  viewCount: number;
+  seriesId?: string;
+  seriesOrder?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -98,4 +102,35 @@ export interface CV {
   version?: string;
   isActive: boolean;
   uploadedAt: string;
+}
+
+export interface Project {
+  id: string;
+  title: string;
+  description: string;
+  longDescription?: string;
+  technologies: string[];
+  category: string;
+  demoUrl?: string;
+  repoUrl?: string;
+  imageUrl?: string;
+  featured: boolean;
+  status: ContentStatus;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogSeries {
+  id: string;
+  title: string;
+  description?: string;
+  slug: string;
+  coverImageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogSeriesWithPosts extends BlogSeries {
+  posts: Pick<Blog, "id" | "title" | "slug" | "publishedAt" | "seriesOrder">[];
 }

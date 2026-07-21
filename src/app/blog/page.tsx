@@ -6,6 +6,20 @@ import BlogListClient from "./BlogListClient";
 export const metadata: Metadata = {
   title: "Blog",
   description: "Articles and insights on Power Platform, Microsoft 365, AI, and productivity.",
+  openGraph: {
+    title: "Blog — Raja Aryos",
+    description: "Articles and insights on Power Platform, Microsoft 365, AI, and productivity.",
+    type: "website",
+    url: "https://rajaaryos.dev/blog",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog — Raja Aryos",
+    description: "Articles and insights on Power Platform, Microsoft 365, AI, and productivity.",
+  },
+  alternates: {
+    canonical: "https://rajaaryos.dev/blog",
+  },
 };
 
 interface BlogPageProps {

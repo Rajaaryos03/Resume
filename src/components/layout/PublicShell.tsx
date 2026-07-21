@@ -2,9 +2,15 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import type { ReactNode } from "react";
 
-export default function PublicShell({ children }: { children: React.ReactNode }) {
+export default function PublicShell({
+  children,
+  footer,
+}: {
+  children: ReactNode;
+  footer: ReactNode;
+}) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
 
@@ -16,7 +22,7 @@ export default function PublicShell({ children }: { children: React.ReactNode })
     <>
       <Navbar />
       <main className="flex-1">{children}</main>
-      <Footer />
+      {footer}
     </>
   );
 }

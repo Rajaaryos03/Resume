@@ -47,15 +47,26 @@ export async function upsertProfile(formData: FormData) {
     linked_in_url: (formData.get("linkedInUrl") as string) || null,
     github_url: (formData.get("githubUrl") as string) || null,
     microsoft_learn_url: (formData.get("microsoftLearnUrl") as string) || null,
+    profile_image_url: (formData.get("profileImageUrl") as string) || null,
     skills,
     updated_at: new Date().toISOString(),
   };
 
   const id = formData.get("id") as string | null;
 
+  const availabilityStatus = (formData.get("availabilityStatus") as string) || null;
+
   if (id) {
     const { error } = await supabase.from("profile").update(payload).eq("id", id);
     if (error) return { error: error.message };
+    // availability_status saved separately — will silently skip if column doesn't exist yet
+    const { error: avErr } = await supabase
+      .from("profile")
+      .update({ availability_status: availabilityStatus })
+      .eq("id", id);
+    if (avErr && !avErr.message.includes("column")) {
+      return { error: avErr.message };
+    }
   } else {
     const { error } = await supabase.from("profile").insert(payload);
     if (error) return { error: error.message };
@@ -94,6 +105,10 @@ export async function upsertBlog(formData: FormData) {
     cover_image_url: (formData.get("coverImageUrl") as string) || null,
     status,
     published_at: publishedAt,
+    series_id: (formData.get("seriesId") as string) || null,
+    series_order: formData.get("seriesOrder")
+      ? parseInt(formData.get("seriesOrder") as string, 10)
+      : null,
     updated_at: new Date().toISOString(),
   };
 
@@ -274,5 +289,93 @@ export async function uploadCV(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/admin/cv");
+  return { success: true };
+}
+
+// ──────────────────────────────
+// PROJECT
+// ──────────────────────────────
+export async function upsertProject(formData: FormData) {
+  const supabase = await createAdminClient();
+
+  const technologiesRaw = (formData.get("technologies") as string) || "";
+  const technologies = technologiesRaw
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+
+  const payload = {
+    title: formData.get("title") as string,
+    description: formData.get("description") as string,
+    long_description: (formData.get("longDescription") as string) || null,
+    technologies,
+    category: formData.get("category") as string,
+    demo_url: (formData.get("demoUrl") as string) || null,
+    repo_url: (formData.get("repoUrl") as string) || null,
+    image_url: (formData.get("imageUrl") as string) || null,
+    featured: formData.get("featured") === "on",
+    status: formData.get("status") as string,
+    sort_order: parseInt((formData.get("sortOrder") as string) || "0", 10),
+    updated_at: new Date().toISOString(),
+  };
+
+  const id = formData.get("id") as string | null;
+
+  if (id) {
+    const { error } = await supabase.from("project").update(payload).eq("id", id);
+    if (error) return { error: error.message };
+  } else {
+    const { error } = await supabase.from("project").insert(payload);
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/#projects");
+  revalidatePath("/admin/project");
+  return { success: true };
+}
+
+export async function deleteProject(id: string) {
+  const supabase = await createAdminClient();
+  const { error } = await supabase.from("project").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/");
+  revalidatePath("/admin/project");
+  return { success: true };
+}
+
+// ──────────────────────────────
+// BLOG SERIES
+// ──────────────────────────────
+export async function upsertSeries(formData: FormData) {
+  const supabase = await createAdminClient();
+
+  const payload = {
+    title: formData.get("title") as string,
+    slug: formData.get("slug") as string,
+    description: (formData.get("description") as string) || null,
+    cover_image_url: (formData.get("coverImageUrl") as string) || null,
+    updated_at: new Date().toISOString(),
+  };
+
+  const id = formData.get("id") as string | null;
+  if (id) {
+    const { error } = await supabase.from("blog_series").update(payload).eq("id", id);
+    if (error) return { error: error.message };
+  } else {
+    const { error } = await supabase.from("blog_series").insert(payload);
+    if (error) return { error: error.message };
+  }
+
+  revalidatePath("/admin/series");
+  revalidatePath("/blog");
+  return { success: true };
+}
+
+export async function deleteSeries(id: string) {
+  const supabase = await createAdminClient();
+  const { error } = await supabase.from("blog_series").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/admin/series");
   return { success: true };
 }

@@ -319,6 +319,26 @@ select option {
   background-color: #ffffff;
 }
 
+/* ── TipTap editor full-width fix ── */
+.tiptap {
+  width: 100%;
+  min-width: 0;
+  display: block;
+  outline: none;
+}
+
+.tiptap.prose {
+  max-width: 100% !important;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #475569;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
 /* ── Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #F1F5F9; }
@@ -344,10 +364,115 @@ select option {
 .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
 .animate-slide-in { animation: slideIn 0.35s ease forwards; }
 
+/* ── Hero dot-grid animated background ── */
+.hero-section {
+  position: relative;
+}
+
+.hero-dot-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(47, 128, 237, 0.18) 1px, transparent 1px);
+  background-size: 28px 28px;
+  animation: dotGridDrift 18s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+@keyframes dotGridDrift {
+  0%   { background-position: 0 0; }
+  100% { background-position: 28px 28px; }
+}
+
+/* ── Typewriter cursor ── */
+.typewriter-cursor {
+  display: inline-block;
+  color: #56CCF2;
+  animation: cursorBlink 0.75s step-end infinite;
+  margin-left: 1px;
+  font-weight: 300;
+}
+
+@keyframes cursorBlink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ── Terminal window ── */
+.terminal-window {
+  background: #0d1117;
+  border: 1px solid rgba(47, 128, 237, 0.25);
+  border-radius: 10px;
+  font-family: var(--font-mono), 'Courier New', monospace;
+  font-size: 0.75rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(47,128,237,0.1);
+  animation: terminalFloat 0.6s ease-out both, terminalBob 6s ease-in-out 1s infinite;
+  will-change: transform;
+}
+
+@keyframes terminalFloat {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes terminalBob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+.terminal-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: #161b22;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px 10px 0 0;
+}
+
+.terminal-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-red    { background: #ff5f56; }
+.dot-yellow { background: #ffbd2e; }
+.dot-green  { background: #27c93f; }
+
+.terminal-title-text {
+  margin-left: 8px;
+  color: #4b5563;
+  font-size: 0.7rem;
+}
+
+.terminal-body {
+  padding: 14px 18px 18px;
+  line-height: 1.9;
+  color: #c9d1d9;
+}
+
+.terminal-prompt { color: #2F80ED; font-weight: 700; margin-right: 6px; }
+.terminal-cmd    { color: #79c0ff; }
+.terminal-output { color: #8b949e; display: block; }
+.terminal-key    { color: #7ee787; }
+.terminal-str    { color: #a5d6ff; }
+
+.terminal-cursor-blink {
+  display: inline-block;
+  color: #2F80ED;
+  animation: cursorBlink 1s step-end infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
   html { scroll-behavior: auto; }
+  .hero-dot-grid { animation: none; }
+  .terminal-window { animation: terminalFloat 0.6s ease-out both; }
 }

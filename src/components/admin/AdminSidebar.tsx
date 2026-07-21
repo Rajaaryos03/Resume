@@ -13,6 +13,10 @@ import {
   ChevronRight,
   Menu,
   X,
+  FolderKanban,
+  MessageSquare,
+  Database,
+  BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 import { signOut } from "@/lib/actions";
@@ -21,10 +25,14 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/blog", label: "Manage Blog", icon: FileText },
+  { href: "/admin/series", label: "Blog Series", icon: BookOpen },
+  { href: "/admin/comments", label: "Comments", icon: MessageSquare },
+  { href: "/admin/project", label: "Projects", icon: FolderKanban },
   { href: "/admin/experience", label: "Experience", icon: Briefcase },
   { href: "/admin/certificate", label: "Certificates", icon: Award },
   { href: "/admin/profile", label: "Profile", icon: User },
   { href: "/admin/cv", label: "CV", icon: FileUp },
+  { href: "/admin/migrations", label: "Migrations", icon: Database },
 ];
 
 export default function AdminSidebar() {

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Download, ArrowRight, Briefcase, BookOpen } from "lucide-react";
 import type { Profile, CV } from "@/types";
+import { TypewriterTitle, TerminalWindow } from "@/components/sections/HeroDynamic";
 
 interface HeroProps {
   profile: Profile;
@@ -11,26 +12,29 @@ interface HeroProps {
 export default function Hero({ profile, cv }: HeroProps) {
   return (
     <section
-      className="relative min-h-screen flex items-center bg-gradient-to-br from-[#0B1F3A] via-[#102A43] to-[#0D2137] overflow-hidden"
+      className="relative min-h-screen flex items-center bg-gradient-to-br from-[#0B1F3A] via-[#102A43] to-[#0D2137] overflow-hidden hero-section"
       aria-label="Hero"
     >
-      {/* Background decoration */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-      >
+      {/* Animated dot grid background */}
+      <div className="hero-dot-grid" aria-hidden="true" />
+
+      {/* Glow blobs */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#2F80ED]/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-[#56CCF2]/8 rounded-full blur-3xl" />
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 pt-24 pb-16 w-full">
         <div className="flex flex-col-reverse md:flex-row items-center gap-10 md:gap-16">
-          {/* Text content */}
+
+          {/* ── Text content ── */}
           <div className="flex-1 text-center md:text-left animate-fade-in">
-            <div className="inline-flex items-center gap-2 bg-[#2F80ED]/20 border border-[#2F80ED]/30 text-[#56CCF2] text-sm font-medium px-3.5 py-1.5 rounded-full mb-5">
-              <span className="w-2 h-2 bg-[#10B981] rounded-full animate-pulse" aria-hidden="true" />
-              Available for opportunities
-            </div>
+            {profile.availabilityStatus && (
+              <div className="inline-flex items-center gap-2 bg-[#2F80ED]/20 border border-[#2F80ED]/30 text-[#56CCF2] text-sm font-medium px-3.5 py-1.5 rounded-full mb-5">
+                <span className="w-2 h-2 bg-[#10B981] rounded-full animate-pulse" aria-hidden="true" />
+                {profile.availabilityStatus}
+              </div>
+            )}
 
             <h1
               className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight"
@@ -40,8 +44,9 @@ export default function Hero({ profile, cv }: HeroProps) {
               <span style={{ color: "#2F80ED" }}>Raja Aryos</span>
             </h1>
 
-            <p className="text-[#56CCF2] text-lg sm:text-xl font-medium mb-4" style={{ color: "#56CCF2" }}>
-              {profile.professionalTitle}
+            {/* Typewriter role title */}
+            <p className="text-lg sm:text-xl font-medium mb-4 min-h-[1.75rem]">
+              <TypewriterTitle />
             </p>
 
             <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-xl mb-8" style={{ color: "#CBD5E1" }}>
@@ -93,8 +98,9 @@ export default function Hero({ profile, cv }: HeroProps) {
             </div>
           </div>
 
-          {/* Profile image */}
-          <div className="flex-shrink-0 animate-fade-in" style={{ animationDelay: "0.15s" }}>
+          {/* ── Right column: profile photo + terminal ── */}
+          <div className="flex-shrink-0 flex flex-col items-center gap-6 animate-fade-in" style={{ animationDelay: "0.15s" }}>
+            {/* Profile photo */}
             <div className="relative w-52 h-52 sm:w-64 sm:h-64 md:w-72 md:h-72">
               <div className="absolute inset-0 bg-gradient-to-br from-[#2F80ED] to-[#56CCF2] rounded-full opacity-20 blur-xl" aria-hidden="true" />
               <div className="relative w-full h-full rounded-full border-4 border-[#2F80ED]/40 overflow-hidden bg-[#102A43]">
@@ -124,6 +130,14 @@ export default function Hero({ profile, cv }: HeroProps) {
                 )}
               </div>
             </div>
+
+            {/* Terminal window */}
+            <TerminalWindow
+              name={profile.fullName}
+              title={profile.professionalTitle}
+              skills={profile.skills}
+              status={profile.availabilityStatus}
+            />
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Calendar, Clock, Tag } from "lucide-react";
+import { Calendar, Clock, Tag, Eye } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import { formatDate, calcReadingTime } from "@/lib/utils";
 import type { Blog } from "@/types";
@@ -82,6 +82,12 @@ export default function BlogCard({ blog, featured }: BlogCardProps) {
             <Clock size={11} aria-hidden="true" />
             {calcReadingTime(blog.content)} min read
           </span>
+          {blog.viewCount > 0 && (
+            <span className="flex items-center gap-1 ml-auto">
+              <Eye size={11} aria-hidden="true" />
+              {blog.viewCount.toLocaleString()}
+            </span>
+          )}
         </div>
       </div>
     </article>

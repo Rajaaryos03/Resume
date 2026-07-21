@@ -1,5 +1,6 @@
 import Section, { SectionHeader } from "@/components/ui/Section";
 import type { Profile } from "@/types";
+import DOMPurify from "isomorphic-dompurify";
 
 export default function About({ profile }: { profile: Profile }) {
   return (
@@ -9,7 +10,7 @@ export default function About({ profile }: { profile: Profile }) {
 
         <div
           className="prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: profile.longDescription }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(profile.longDescription) }}
         />
 
         {profile.skills.length > 0 && (

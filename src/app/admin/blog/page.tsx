@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PlusCircle, Pencil } from "lucide-react";
+import { PlusCircle, Pencil, Eye } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import Badge from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
@@ -9,21 +9,46 @@ import { deleteBlog } from "@/lib/actions";
 
 export const metadata: Metadata = { title: "Manage Blog" };
 
-export default async function AdminBlogListPage() {
+type FilterStatus = "all" | "published" | "draft";
+
+export default async function AdminBlogListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const { status } = await searchParams;
+  const filter = (status ?? "all") as FilterStatus;
+
   const supabase = await createAdminClient();
-  const { data: blogs } = await supabase
+
+  let query = supabase
     .from("blog")
-    .select("id, title, category, status, published_at, created_at")
-    .order("created_at", { ascending: false });
+    .select("id, title, category, status, published_at, created_at, view_count")
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  if (filter === "published") query = query.eq("status", "published");
+  if (filter === "draft") query = query.eq("status", "draft");
+
+  const { data: blogs } = await query;
+
+  const tabs: { label: string; value: FilterStatus }[] = [
+    { label: "Latest 10", value: "all" },
+    { label: "Published", value: "published" },
+    { label: "Drafts", value: "draft" },
+  ];
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>
             Manage Blog
           </h1>
-          <p className="text-slate-400 text-sm mt-1">{blogs?.length ?? 0} posts total</p>
+          <p className="text-slate-400 text-sm mt-1">
+            Showing {blogs?.length ?? 0} post{blogs?.length !== 1 ? "s" : ""}
+            {filter !== "all" ? ` · ${filter}` : " · latest 10"}
+          </p>
         </div>
         <Link
           href="/admin/blog/new"
@@ -34,11 +59,30 @@ export default async function AdminBlogListPage() {
         </Link>
       </div>
 
+      {/* Filter tabs */}
+      <div className="flex gap-1 mb-5 bg-white/5 p-1 rounded-lg w-fit">
+        {tabs.map((tab) => (
+          <Link
+            key={tab.value}
+            href={tab.value === "all" ? "/admin/blog" : `/admin/blog?status=${tab.value}`}
+            className={`px-3.5 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              filter === tab.value
+                ? "bg-[#2F80ED] text-white"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </div>
+
       {!blogs?.length ? (
         <div className="admin-card p-12 text-center">
           <p className="text-4xl mb-3" aria-hidden="true">📝</p>
-          <p className="font-semibold text-white">No blog posts yet</p>
-          <p className="text-sm text-slate-400 mt-1">Create your first post to get started.</p>
+          <p className="font-semibold text-white">No blog posts found</p>
+          <p className="text-sm text-slate-400 mt-1">
+            {filter !== "all" ? "Try a different filter." : "Create your first post to get started."}
+          </p>
         </div>
       ) : (
         <div className="admin-card overflow-hidden">
@@ -49,6 +93,9 @@ export default async function AdminBlogListPage() {
                   <th className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider">Title</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider hidden sm:table-cell">Category</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider">Status</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider hidden md:table-cell">
+                    <span className="inline-flex items-center gap-1"><Eye size={11} aria-hidden="true" />Views</span>
+                  </th>
                   <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider hidden md:table-cell">Date</th>
                   <th className="text-right px-5 py-3 text-xs font-semibold uppercase tracking-wider">Actions</th>
                 </tr>
@@ -57,7 +104,7 @@ export default async function AdminBlogListPage() {
                 {blogs.map((blog) => (
                   <tr key={blog.id}>
                     <td className="px-5 py-3.5">
-                      <p className="font-medium truncate max-w-xs">{blog.title}</p>
+                      <p className="font-medium truncate max-w-[200px]">{blog.title}</p>
                     </td>
                     <td className="px-4 py-3.5 hidden sm:table-cell">
                       <Badge variant="default">{blog.category}</Badge>
@@ -66,6 +113,12 @@ export default async function AdminBlogListPage() {
                       <Badge variant={blog.status === "published" ? "success" : "warning"}>
                         {blog.status}
                       </Badge>
+                    </td>
+                    <td className="px-4 py-3.5 hidden md:table-cell">
+                      <span className="inline-flex items-center gap-1 text-slate-300 font-medium">
+                        <Eye size={12} className="text-slate-500" aria-hidden="true" />
+                        {(blog.view_count ?? 0).toLocaleString()}
+                      </span>
                     </td>
                     <td className="px-4 py-3.5 text-slate-400 text-xs hidden md:table-cell">
                       {blog.published_at ? formatDate(blog.published_at) : formatDate(blog.created_at)}

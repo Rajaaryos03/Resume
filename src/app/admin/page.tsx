@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileText, Briefcase, Award, User, FileUp, PlusCircle } from "lucide-react";
+import { FileText, Briefcase, Award, User, FileUp, PlusCircle, FolderKanban, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -13,6 +13,8 @@ async function getDashboardStats() {
     { count: draftBlog },
     { count: totalExp },
     { count: totalCert },
+    { count: totalProject },
+    totalViews,
     profile,
     cv,
   ] = await Promise.all([
@@ -21,15 +23,25 @@ async function getDashboardStats() {
     supabase.from("blog").select("*", { count: "exact", head: true }).eq("status", "draft"),
     supabase.from("experience").select("*", { count: "exact", head: true }),
     supabase.from("certificate").select("*", { count: "exact", head: true }),
+    supabase.from("project").select("*", { count: "exact", head: true }).eq("status", "published"),
+    supabase.from("blog").select("view_count").eq("status", "published"),
     supabase.from("profile").select("updated_at").order("updated_at", { ascending: false }).limit(1).single(),
     supabase.from("cv").select("display_name, uploaded_at").eq("is_active", true).order("uploaded_at", { ascending: false }).limit(1).single(),
   ]);
+
+  const totalViewCount = (totalViews.data ?? []).reduce(
+    (sum: number, row: { view_count: number }) => sum + (row.view_count ?? 0),
+    0
+  );
+
   return {
     totalBlog: totalBlog ?? 0,
     publishedBlog: publishedBlog ?? 0,
     draftBlog: draftBlog ?? 0,
     totalExp: totalExp ?? 0,
     totalCert: totalCert ?? 0,
+    totalProject: totalProject ?? 0,
+    totalViewCount,
     profileUpdatedAt: profile.data?.updated_at ?? null,
     activeCvName: cv.data?.display_name ?? null,
   };
@@ -39,19 +51,22 @@ export default async function AdminDashboard() {
   const stats = await getDashboardStats();
 
   const cards = [
-    { label: "Total Blogs",   value: stats.totalBlog,     icon: FileText,  href: "/admin/blog" },
-    { label: "Published",     value: stats.publishedBlog, icon: FileText,  href: "/admin/blog" },
-    { label: "Drafts",        value: stats.draftBlog,     icon: FileText,  href: "/admin/blog" },
-    { label: "Experiences",   value: stats.totalExp,      icon: Briefcase, href: "/admin/experience" },
-    { label: "Certificates",  value: stats.totalCert,     icon: Award,     href: "/admin/certificate" },
+    { label: "Total Blogs",    value: stats.totalBlog,       icon: FileText,      href: "/admin/blog" },
+    { label: "Published",      value: stats.publishedBlog,   icon: FileText,      href: "/admin/blog" },
+    { label: "Drafts",         value: stats.draftBlog,       icon: FileText,      href: "/admin/blog" },
+    { label: "Projects",       value: stats.totalProject,    icon: FolderKanban,  href: "/admin/project" },
+    { label: "Experiences",    value: stats.totalExp,        icon: Briefcase,     href: "/admin/experience" },
+    { label: "Certificates",   value: stats.totalCert,       icon: Award,         href: "/admin/certificate" },
+    { label: "Total Blog Views", value: stats.totalViewCount.toLocaleString(), icon: Eye, href: "/admin/blog" },
   ];
 
   const quickActions = [
-    { href: "/admin/blog/new",        label: "New Blog Post",   icon: PlusCircle, primary: true },
-    { href: "/admin/experience/new",  label: "Add Experience",  icon: Briefcase,  primary: true },
-    { href: "/admin/certificate/new", label: "Add Certificate", icon: Award,      primary: true },
-    { href: "/admin/profile",         label: "Update Profile",  icon: User,       primary: false },
-    { href: "/admin/cv",              label: "Upload CV",       icon: FileUp,     primary: false },
+    { href: "/admin/blog/new",        label: "New Blog Post",   icon: PlusCircle,   primary: true },
+    { href: "/admin/project/new",     label: "Add Project",     icon: FolderKanban, primary: true },
+    { href: "/admin/experience/new",  label: "Add Experience",  icon: Briefcase,    primary: true },
+    { href: "/admin/certificate/new", label: "Add Certificate", icon: Award,        primary: true },
+    { href: "/admin/profile",         label: "Update Profile",  icon: User,         primary: false },
+    { href: "/admin/cv",              label: "Upload CV",       icon: FileUp,       primary: false },
   ];
 
   return (
@@ -66,7 +81,7 @@ export default async function AdminDashboard() {
       {/* Stats */}
       <section aria-labelledby="stats-heading" className="mb-8">
         <h2 id="stats-heading" className="sr-only">Content statistics</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {cards.map((card) => (
             <Link
               key={card.label}

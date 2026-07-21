@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Blog, Certificate, CV, Experience, Profile } from "@/types";
+import type { Blog, BlogSeries, BlogSeriesWithPosts, Certificate, CV, Experience, Profile, Project } from "@/types";
 
 // ──────────────────────────────
 // PROFILE
@@ -75,6 +75,37 @@ export async function getFeaturedBlogs(limit = 3): Promise<Blog[]> {
   return (data ?? []).map(mapBlog);
 }
 
+export async function getRelatedBlogs(
+  slug: string,
+  category: string,
+  limit = 3
+): Promise<Blog[]> {
+  const supabase = await createClient();
+
+  // First try same category
+  const { data: byCat } = await supabase
+    .from("blog")
+    .select("*")
+    .eq("status", "published")
+    .eq("category", category)
+    .neq("slug", slug)
+    .order("published_at", { ascending: false })
+    .limit(limit);
+
+  if ((byCat ?? []).length >= 2) return byCat!.map(mapBlog);
+
+  // Fall back to latest posts excluding current
+  const { data: latest } = await supabase
+    .from("blog")
+    .select("*")
+    .eq("status", "published")
+    .neq("slug", slug)
+    .order("published_at", { ascending: false })
+    .limit(limit);
+
+  return (latest ?? []).map(mapBlog);
+}
+
 // ──────────────────────────────
 // EXPERIENCE (public)
 // ──────────────────────────────
@@ -126,6 +157,27 @@ export async function getActiveCV(): Promise<CV | null> {
 }
 
 // ──────────────────────────────
+// PROJECT (public)
+// ──────────────────────────────
+export async function getPublishedProjects(): Promise<Project[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("project")
+    .select("*")
+    .eq("status", "published")
+    .order("sort_order", { ascending: true })
+    .order("created_at", { ascending: false });
+  return (data ?? []).map(mapProject);
+}
+
+export async function getProjectById(id: string): Promise<Project | null> {
+  const supabase = await createClient();
+  const { data } = await supabase.from("project").select("*").eq("id", id).single();
+  if (!data) return null;
+  return mapProject(data);
+}
+
+// ──────────────────────────────
 // MAPPERS (snake_case → camelCase)
 // ──────────────────────────────
 function mapProfile(d: Record<string, unknown>): Profile {
@@ -141,6 +193,7 @@ function mapProfile(d: Record<string, unknown>): Profile {
     githubUrl: d.github_url as string | undefined,
     microsoftLearnUrl: d.microsoft_learn_url as string | undefined,
     profileImageUrl: d.profile_image_url as string | undefined,
+    availabilityStatus: d.availability_status as string | undefined,
     skills: (d.skills as string[]) ?? [],
     createdAt: d.created_at as string,
     updatedAt: d.updated_at as string,
@@ -159,6 +212,9 @@ function mapBlog(d: Record<string, unknown>): Blog {
     coverImageUrl: d.cover_image_url as string | undefined,
     status: d.status as Blog["status"],
     publishedAt: d.published_at as string | undefined,
+    viewCount: (d.view_count as number) ?? 0,
+    seriesId: d.series_id as string | undefined,
+    seriesOrder: d.series_order as number | undefined,
     createdAt: d.created_at as string,
     updatedAt: d.updated_at as string,
   };
@@ -211,5 +267,108 @@ function mapCV(d: Record<string, unknown>): CV {
     version: d.version as string | undefined,
     isActive: (d.is_active as boolean) ?? false,
     uploadedAt: d.uploaded_at as string,
+  };
+}
+
+function mapProject(d: Record<string, unknown>): Project {
+  return {
+    id: d.id as string,
+    title: d.title as string,
+    description: d.description as string,
+    longDescription: d.long_description as string | undefined,
+    technologies: (d.technologies as string[]) ?? [],
+    category: d.category as string,
+    demoUrl: d.demo_url as string | undefined,
+    repoUrl: d.repo_url as string | undefined,
+    imageUrl: d.image_url as string | undefined,
+    featured: (d.featured as boolean) ?? false,
+    status: d.status as Project["status"],
+    sortOrder: (d.sort_order as number) ?? 0,
+    createdAt: d.created_at as string,
+    updatedAt: d.updated_at as string,
+  };
+}
+
+// ──────────────────────────────
+// BLOG SERIES (public)
+// ──────────────────────────────
+export async function getAllSeries(): Promise<BlogSeriesWithPosts[]> {
+  const supabase = await createClient();
+  const { data: seriesList } = await supabase
+    .from("blog_series")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (!seriesList?.length) return [];
+
+  const result: BlogSeriesWithPosts[] = [];
+  for (const s of seriesList) {
+    const { data: posts } = await supabase
+      .from("blog")
+      .select("id, title, slug, published_at, series_order")
+      .eq("series_id", s.id)
+      .eq("status", "published")
+      .order("series_order", { ascending: true });
+
+    result.push({
+      id: s.id,
+      title: s.title,
+      description: s.description ?? undefined,
+      slug: s.slug,
+      coverImageUrl: s.cover_image_url ?? undefined,
+      createdAt: s.created_at,
+      updatedAt: s.updated_at,
+      posts: (posts ?? []).map((p) => ({
+        id: p.id,
+        title: p.title,
+        slug: p.slug,
+        publishedAt: p.published_at ?? undefined,
+        seriesOrder: p.series_order ?? undefined,
+      })),
+    });
+  }
+  return result;
+}
+
+export async function getSeriesByBlogId(blogId: string): Promise<BlogSeriesWithPosts | null> {
+  const supabase = await createClient();
+  const { data: blog } = await supabase
+    .from("blog")
+    .select("series_id")
+    .eq("id", blogId)
+    .single();
+
+  if (!blog?.series_id) return null;
+
+  const { data: series } = await supabase
+    .from("blog_series")
+    .select("*")
+    .eq("id", blog.series_id)
+    .single();
+
+  if (!series) return null;
+
+  const { data: posts } = await supabase
+    .from("blog")
+    .select("id, title, slug, published_at, series_order")
+    .eq("series_id", series.id)
+    .eq("status", "published")
+    .order("series_order", { ascending: true });
+
+  return {
+    id: series.id,
+    title: series.title,
+    description: series.description ?? undefined,
+    slug: series.slug,
+    coverImageUrl: series.cover_image_url ?? undefined,
+    createdAt: series.created_at,
+    updatedAt: series.updated_at,
+    posts: (posts ?? []).map((p) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      publishedAt: p.published_at ?? undefined,
+      seriesOrder: p.series_order ?? undefined,
+    })),
   };
 }

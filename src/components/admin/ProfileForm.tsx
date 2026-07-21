@@ -66,6 +66,22 @@ export default function ProfileForm({ profile }: { profile?: Profile }) {
             <input id="profileImageUrl" name="profileImageUrl" type="url" defaultValue={profile?.profileImageUrl ?? ""} className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none transition" placeholder="https://…" />
           </div>
         </div>
+
+        <div>
+          <label htmlFor="availabilityStatus" className="block text-sm font-semibold text-white mb-1.5">
+            Availability Badge
+          </label>
+          <input
+            id="availabilityStatus"
+            name="availabilityStatus"
+            type="text"
+            defaultValue={profile?.availabilityStatus ?? ""}
+            className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none transition"
+            placeholder="Available for opportunities"
+            maxLength={60}
+          />
+          <p className="text-xs text-slate-500 mt-1">Shown as badge di hero. Kosongkan untuk disembunyikan.</p>
+        </div>
       </div>
 
       <div className="admin-card p-5 sm:p-6 space-y-5">

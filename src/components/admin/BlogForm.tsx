@@ -1,13 +1,24 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, ImageIcon, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import toast from "react-hot-toast";
 import { upsertBlog } from "@/lib/actions";
 import { slugify } from "@/lib/utils";
-import type { Blog, BlogCategory } from "@/types";
+import type { Blog, BlogCategory, BlogSeries } from "@/types";
+import dynamic from "next/dynamic";
+
+const RichTextEditor = dynamic(() => import("@/components/admin/RichTextEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="border border-white/15 rounded-lg bg-[#0B1F3A] min-h-[400px] flex items-center justify-center">
+      <Loader2 size={20} className="animate-spin text-slate-400" />
+    </div>
+  ),
+});
 
 const CATEGORIES: BlogCategory[] = [
   "Power Platform",
@@ -23,23 +34,58 @@ const CATEGORIES: BlogCategory[] = [
 
 interface BlogFormProps {
   blog?: Blog;
+  seriesList?: Pick<BlogSeries, "id" | "title">[];
 }
 
-export default function BlogForm({ blog }: BlogFormProps) {
+export default function BlogForm({ blog, seriesList = [] }: BlogFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [title, setTitle] = useState(blog?.title ?? "");
   const [slug, setSlug] = useState(blog?.slug ?? "");
   const [slugManual, setSlugManual] = useState(!!blog?.slug);
+  const [content, setContent] = useState(blog?.content ?? "");
+  const [coverImageUrl, setCoverImageUrl] = useState(blog?.coverImageUrl ?? "");
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   const handleTitleChange = (v: string) => {
     setTitle(v);
     if (!slugManual) setSlug(slugify(v));
   };
 
+  const handleCoverUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Only image files are allowed.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB.");
+      return;
+    }
+    setUploadingCover(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload-image", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        toast.error(data.error ?? "Upload failed.");
+        return;
+      }
+      setCoverImageUrl(data.url);
+      toast.success("Cover image uploaded!");
+    } catch {
+      toast.error("Upload failed.");
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    formData.set("content", content);
+    formData.set("coverImageUrl", coverImageUrl);
 
     startTransition(async () => {
       const result = await upsertBlog(formData);
@@ -182,36 +228,103 @@ export default function BlogForm({ blog }: BlogFormProps) {
             <p className="text-xs text-slate-500 mt-1">Separate tags with commas</p>
           </div>
 
-          {/* Cover image URL */}
+          {/* Series */}
+          {seriesList.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="seriesId" className="block text-sm font-semibold text-white mb-1.5">
+                  Series
+                </label>
+                <select
+                  id="seriesId"
+                  name="seriesId"
+                  defaultValue={blog?.seriesId ?? ""}
+                  className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none transition bg-white"
+                >
+                  <option value="">— No series —</option>
+                  {seriesList.map((s) => (
+                    <option key={s.id} value={s.id}>{s.title}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="seriesOrder" className="block text-sm font-semibold text-white mb-1.5">
+                  Part #
+                </label>
+                <input
+                  id="seriesOrder"
+                  name="seriesOrder"
+                  type="number"
+                  min={1}
+                  defaultValue={blog?.seriesOrder ?? ""}
+                  className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none transition"
+                  placeholder="1"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Cover Image */}
           <div>
-            <label htmlFor="coverImageUrl" className="block text-sm font-semibold text-white mb-1.5">
-              Cover Image URL
+            <label className="block text-sm font-semibold text-white mb-1.5">
+              Cover Image
             </label>
+            {coverImageUrl ? (
+              <div className="relative w-full h-40 rounded-lg overflow-hidden border border-white/15">
+                <Image
+                  src={coverImageUrl}
+                  alt="Cover preview"
+                  fill
+                  className="object-cover"
+                  sizes="600px"
+                />
+                <button
+                  type="button"
+                  onClick={() => setCoverImageUrl("")}
+                  className="absolute top-2 right-2 p-1 bg-black/60 hover:bg-black/80 rounded-full text-white transition-colors"
+                  title="Remove cover image"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => coverInputRef.current?.click()}
+                disabled={uploadingCover}
+                className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-white/20 hover:border-[#2F80ED]/60 rounded-lg py-8 text-slate-400 hover:text-[#2F80ED] transition-colors"
+              >
+                {uploadingCover ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <ImageIcon size={18} />
+                )}
+                <span className="text-sm">{uploadingCover ? "Uploading…" : "Click to upload cover image"}</span>
+              </button>
+            )}
             <input
-              id="coverImageUrl"
-              name="coverImageUrl"
-              type="url"
-              defaultValue={blog?.coverImageUrl ?? ""}
-              className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none transition"
-              placeholder="https://…"
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleCoverUpload(file);
+                e.target.value = "";
+              }}
             />
           </div>
         </div>
 
         {/* Content */}
         <div className="admin-card p-5 sm:p-6">
-          <label htmlFor="content" className="block text-sm font-semibold text-white mb-3">
+          <label className="block text-sm font-semibold text-white mb-3">
             Content <span className="text-red-500" aria-hidden="true">*</span>
-            <span className="text-xs text-slate-400 font-normal ml-2">(HTML supported)</span>
           </label>
-          <textarea
-            id="content"
+          <RichTextEditor
             name="content"
-            required
-            rows={20}
-            defaultValue={blog?.content ?? ""}
-            className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm font-mono resize-y focus:outline-none transition"
-            placeholder="<p>Write your blog content here…</p>"
+            value={content}
+            onChange={setContent}
           />
         </div>
 
