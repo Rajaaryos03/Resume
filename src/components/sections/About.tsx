@@ -1,6 +1,6 @@
 import Section, { SectionHeader } from "@/components/ui/Section";
 import type { Profile } from "@/types";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 
 export default function About({ profile }: { profile: Profile }) {
   return (
@@ -10,7 +10,10 @@ export default function About({ profile }: { profile: Profile }) {
 
         <div
           className="prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(profile.longDescription) }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(profile.longDescription, {
+            allowedTags: sanitizeHtml.defaults.allowedTags.concat(["h1", "h2", "h3", "h4"]),
+            allowedAttributes: { ...sanitizeHtml.defaults.allowedAttributes, "*": ["class", "style"] },
+          }) }}
         />
 
         {profile.skills.length > 0 && (

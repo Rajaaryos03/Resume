@@ -8,7 +8,7 @@ import { formatDate, calcReadingTime } from "@/lib/utils";
 import Badge from "@/components/ui/Badge";
 import BlogCard from "@/components/blog/BlogCard";
 import ViewCounter from "@/components/blog/ViewCounter";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import BlogReactions from "@/components/blog/BlogReactions";
 import BlogComments from "@/components/blog/BlogComments";
 import ShareButtons from "@/components/blog/ShareButtons";
@@ -133,7 +133,14 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           {/* Content */}
           <div
             className="prose max-w-none"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(blog.content, {
+              allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "h1", "h2", "h3", "h4", "iframe"]),
+              allowedAttributes: {
+                ...sanitizeHtml.defaults.allowedAttributes,
+                img: ["src", "alt", "width", "height", "class", "style"],
+                "*": ["class", "style", "id"],
+              },
+            }) }}
           />
 
           {/* Reactions + Share */}

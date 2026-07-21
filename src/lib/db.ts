@@ -160,21 +160,30 @@ export async function getActiveCV(): Promise<CV | null> {
 // PROJECT (public)
 // ──────────────────────────────
 export async function getPublishedProjects(): Promise<Project[]> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("project")
-    .select("*")
-    .eq("status", "published")
-    .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: false });
-  return (data ?? []).map(mapProject);
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("project")
+      .select("*")
+      .eq("status", "published")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+    if (error) return [];
+    return (data ?? []).map(mapProject);
+  } catch {
+    return [];
+  }
 }
 
 export async function getProjectById(id: string): Promise<Project | null> {
-  const supabase = await createClient();
-  const { data } = await supabase.from("project").select("*").eq("id", id).single();
-  if (!data) return null;
-  return mapProject(data);
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.from("project").select("*").eq("id", id).single();
+    if (error || !data) return null;
+    return mapProject(data);
+  } catch {
+    return null;
+  }
 }
 
 // ──────────────────────────────
@@ -293,31 +302,81 @@ function mapProject(d: Record<string, unknown>): Project {
 // BLOG SERIES (public)
 // ──────────────────────────────
 export async function getAllSeries(): Promise<BlogSeriesWithPosts[]> {
-  const supabase = await createClient();
-  const { data: seriesList } = await supabase
-    .from("blog_series")
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    const supabase = await createClient();
+    const { data: seriesList, error } = await supabase
+      .from("blog_series")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (!seriesList?.length) return [];
+    if (error || !seriesList?.length) return [];
 
-  const result: BlogSeriesWithPosts[] = [];
-  for (const s of seriesList) {
+    const result: BlogSeriesWithPosts[] = [];
+    for (const s of seriesList) {
+      const { data: posts } = await supabase
+        .from("blog")
+        .select("id, title, slug, published_at, series_order")
+        .eq("series_id", s.id)
+        .eq("status", "published")
+        .order("series_order", { ascending: true });
+
+      result.push({
+        id: s.id,
+        title: s.title,
+        description: s.description ?? undefined,
+        slug: s.slug,
+        coverImageUrl: s.cover_image_url ?? undefined,
+        createdAt: s.created_at,
+        updatedAt: s.updated_at,
+        posts: (posts ?? []).map((p) => ({
+          id: p.id,
+          title: p.title,
+          slug: p.slug,
+          publishedAt: p.published_at ?? undefined,
+          seriesOrder: p.series_order ?? undefined,
+        })),
+      });
+    }
+    return result;
+  } catch {
+    return [];
+  }
+}
+
+export async function getSeriesByBlogId(blogId: string): Promise<BlogSeriesWithPosts | null> {
+  try {
+    const supabase = await createClient();
+    const { data: blog, error: blogError } = await supabase
+      .from("blog")
+      .select("series_id")
+      .eq("id", blogId)
+      .single();
+
+    if (blogError || !blog?.series_id) return null;
+
+    const { data: series, error: seriesError } = await supabase
+      .from("blog_series")
+      .select("*")
+      .eq("id", blog.series_id)
+      .single();
+
+    if (seriesError || !series) return null;
+
     const { data: posts } = await supabase
       .from("blog")
       .select("id, title, slug, published_at, series_order")
-      .eq("series_id", s.id)
+      .eq("series_id", series.id)
       .eq("status", "published")
       .order("series_order", { ascending: true });
 
-    result.push({
-      id: s.id,
-      title: s.title,
-      description: s.description ?? undefined,
-      slug: s.slug,
-      coverImageUrl: s.cover_image_url ?? undefined,
-      createdAt: s.created_at,
-      updatedAt: s.updated_at,
+    return {
+      id: series.id,
+      title: series.title,
+      description: series.description ?? undefined,
+      slug: series.slug,
+      coverImageUrl: series.cover_image_url ?? undefined,
+      createdAt: series.created_at,
+      updatedAt: series.updated_at,
       posts: (posts ?? []).map((p) => ({
         id: p.id,
         title: p.title,
@@ -325,50 +384,8 @@ export async function getAllSeries(): Promise<BlogSeriesWithPosts[]> {
         publishedAt: p.published_at ?? undefined,
         seriesOrder: p.series_order ?? undefined,
       })),
-    });
+    };
+  } catch {
+    return null;
   }
-  return result;
-}
-
-export async function getSeriesByBlogId(blogId: string): Promise<BlogSeriesWithPosts | null> {
-  const supabase = await createClient();
-  const { data: blog } = await supabase
-    .from("blog")
-    .select("series_id")
-    .eq("id", blogId)
-    .single();
-
-  if (!blog?.series_id) return null;
-
-  const { data: series } = await supabase
-    .from("blog_series")
-    .select("*")
-    .eq("id", blog.series_id)
-    .single();
-
-  if (!series) return null;
-
-  const { data: posts } = await supabase
-    .from("blog")
-    .select("id, title, slug, published_at, series_order")
-    .eq("series_id", series.id)
-    .eq("status", "published")
-    .order("series_order", { ascending: true });
-
-  return {
-    id: series.id,
-    title: series.title,
-    description: series.description ?? undefined,
-    slug: series.slug,
-    coverImageUrl: series.cover_image_url ?? undefined,
-    createdAt: series.created_at,
-    updatedAt: series.updated_at,
-    posts: (posts ?? []).map((p) => ({
-      id: p.id,
-      title: p.title,
-      slug: p.slug,
-      publishedAt: p.published_at ?? undefined,
-      seriesOrder: p.series_order ?? undefined,
-    })),
-  };
 }
