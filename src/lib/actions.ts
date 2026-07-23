@@ -97,7 +97,7 @@ export async function upsertBlog(formData: FormData) {
     if (!scheduledAtRaw) return { error: "Publish date is required for scheduled posts." };
     const scheduledDate = new Date(scheduledAtRaw);
     if (isNaN(scheduledDate.getTime())) return { error: "Invalid publish date." };
-    if (scheduledDate <= new Date()) return { error: "Scheduled date must be in the future." };
+    // Allow saving even if date is in the past/now — cron will publish on next run
   }
 
   // Scheduled posts are stored as 'draft' with scheduled_at set

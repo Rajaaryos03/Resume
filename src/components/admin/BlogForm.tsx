@@ -54,9 +54,13 @@ export default function BlogForm({ blog, seriesList = [] }: BlogFormProps) {
       ? "published"
       : "draft"
   );
-  const [scheduledAt, setScheduledAt] = useState<string>(
-    blog?.scheduledAt ? new Date(blog.scheduledAt).toISOString().slice(0, 16) : ""
-  );
+  const [scheduledAt, setScheduledAt] = useState<string>(() => {
+    if (!blog?.scheduledAt) return "";
+    // Convert stored UTC ISO to local datetime-local format (YYYY-MM-DDTHH:MM)
+    const d = new Date(blog.scheduledAt);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  });
   const [uploadingCover, setUploadingCover] = useState(false);
   const [publishingMedium, setPublishingMedium] = useState(false);
   const [mediumUrl, setMediumUrl] = useState<string | null>(null);
@@ -132,7 +136,9 @@ export default function BlogForm({ blog, seriesList = [] }: BlogFormProps) {
     // (scheduledAt input is conditionally rendered so may not be in FormData)
     formData.set("status", status);
     if (status === "scheduled") {
-      formData.set("scheduledAt", scheduledAt);
+      // datetime-local value is in local (WIB/browser) time — convert to UTC ISO for DB
+      const localDate = new Date(scheduledAt);
+      formData.set("scheduledAt", localDate.toISOString());
     } else {
       formData.delete("scheduledAt");
     }
@@ -346,11 +352,10 @@ export default function BlogForm({ blog, seriesList = [] }: BlogFormProps) {
                 required
                 value={scheduledAt}
                 onChange={(e) => setScheduledAt(e.target.value)}
-                min={new Date().toISOString().slice(0, 16)}
                 className="admin-input w-full px-3.5 py-2.5 rounded-lg border text-sm focus:outline-none transition"
               />
               <p className="text-xs text-slate-500 mt-1">
-                Post will auto-publish at this date &amp; time (UTC). A cron job at <code className="font-mono text-slate-400">/api/cron/publish-scheduled</code> must be triggered periodically.
+                Post will auto-publish at this date &amp; time (WIB/UTC+7). Cron job runs daily at 08:00 WIB.
               </p>
             </div>
           )}
