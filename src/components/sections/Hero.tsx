@@ -111,6 +111,8 @@ export default function Hero({ profile, cv }: HeroProps) {
                     fill
                     className="object-cover"
                     priority
+                    loading="eager"
+                    fetchPriority="high"
                     sizes="(max-width: 640px) 208px, (max-width: 768px) 256px, 288px"
                   />
                 ) : (

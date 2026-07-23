@@ -46,6 +46,9 @@ export const metadata: Metadata = {
       "Power Platform Developer focused on building business solutions with Power Apps, Power Automate, Dataverse, SharePoint, and Microsoft Copilot Studio.",
   },
   robots: { index: true, follow: true },
+  alternates: {
+    types: { "application/rss+xml": "/feed.xml" },
+  },
 };
 
 export default function RootLayout({
@@ -56,6 +59,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable} data-scroll-behavior="smooth">
       <head>
+        <link rel="alternate" type="application/rss+xml" title="Raja Aryos Blog" href="/feed.xml" />
+        <meta name="theme-color" content="#0B1F3A" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

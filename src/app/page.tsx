@@ -13,6 +13,8 @@ import CertificateSection from "@/components/sections/CertificateSection";
 import ProjectsSection from "@/components/sections/ProjectsSection";
 import LatestBlogSection from "@/components/sections/LatestBlogSection";
 import ContactSection from "@/components/sections/ContactSection";
+import GitHubSection from "@/components/sections/GitHubSection";
+import { PersonJsonLd, WebsiteJsonLd } from "@/components/seo/JsonLd";
 
 export const revalidate = 60;
 
@@ -36,12 +38,15 @@ export default async function HomePage() {
 
   return (
     <>
+      <PersonJsonLd profile={profile} />
+      <WebsiteJsonLd />
       <Hero profile={profile} cv={cv} />
       <About profile={profile} />
       <ExperienceSection experiences={experiences} />
       <ProjectsSection projects={projects} />
       <CertificateSection certificates={certificates} />
       <LatestBlogSection blogs={blogs} />
+      <GitHubSection />
       <ContactSection profile={profile} cv={cv} />
     </>
   );

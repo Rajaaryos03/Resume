@@ -117,6 +117,22 @@ CREATE POLICY "Public read published projects" ON project FOR SELECT USING (stat
     description: "Adds availability_status to profile for hero badge.",
     sql: `ALTER TABLE profile ADD COLUMN IF NOT EXISTS availability_status text;`,
   },
+  {
+    id: "scheduled_publish",
+    label: "Scheduled publish",
+    status: "required",
+    description: "Adds scheduled_at column to blog table for scheduled publish feature.",
+    sql: `ALTER TABLE blog ADD COLUMN IF NOT EXISTS scheduled_at timestamptz;`,
+  },
+  {
+    id: "medium_integration",
+    label: "Medium integration columns",
+    status: "required",
+    description: "Adds medium_guid and medium_url columns to blog for Medium import/publish.",
+    sql: `ALTER TABLE blog ADD COLUMN IF NOT EXISTS medium_guid text;
+ALTER TABLE blog ADD COLUMN IF NOT EXISTS medium_url text;
+CREATE UNIQUE INDEX IF NOT EXISTS blog_medium_guid_idx ON blog(medium_guid) WHERE medium_guid IS NOT NULL;`,
+  },
 ];
 
 function CopyButton({ text }: { text: string }) {

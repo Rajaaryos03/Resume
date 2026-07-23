@@ -475,4 +475,10 @@ select option {
   html { scroll-behavior: auto; }
   .hero-dot-grid { animation: none; }
   .terminal-window { animation: terminalFloat 0.6s ease-out both; }
+  /* Immediately show scroll-reveal elements for reduced-motion users */
+  [data-scroll-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }

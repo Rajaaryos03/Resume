@@ -17,6 +17,8 @@ import {
   MessageSquare,
   Database,
   BookOpen,
+  ImageIcon,
+  Download,
 } from "lucide-react";
 import { useState } from "react";
 import { signOut } from "@/lib/actions";
@@ -27,6 +29,8 @@ const navItems = [
   { href: "/admin/blog", label: "Manage Blog", icon: FileText },
   { href: "/admin/series", label: "Blog Series", icon: BookOpen },
   { href: "/admin/comments", label: "Comments", icon: MessageSquare },
+  { href: "/admin/media", label: "Media Manager", icon: ImageIcon },
+  { href: "/admin/medium", label: "Import Medium", icon: Download },
   { href: "/admin/project", label: "Projects", icon: FolderKanban },
   { href: "/admin/experience", label: "Experience", icon: Briefcase },
   { href: "/admin/certificate", label: "Certificates", icon: Award },

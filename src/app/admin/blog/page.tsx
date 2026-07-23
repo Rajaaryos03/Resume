@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PlusCircle, Pencil, Eye } from "lucide-react";
+import { PlusCircle, Pencil, Eye, Clock } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import Badge from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
@@ -9,7 +9,7 @@ import { deleteBlog } from "@/lib/actions";
 
 export const metadata: Metadata = { title: "Manage Blog" };
 
-type FilterStatus = "all" | "published" | "draft";
+type FilterStatus = "all" | "published" | "draft" | "scheduled";
 
 export default async function AdminBlogListPage({
   searchParams,
@@ -23,19 +23,29 @@ export default async function AdminBlogListPage({
 
   let query = supabase
     .from("blog")
-    .select("id, title, category, status, published_at, created_at, view_count")
+    .select("id, title, category, status, scheduled_at, published_at, created_at, view_count")
     .order("created_at", { ascending: false })
-    .limit(10);
+    .limit(50);
 
   if (filter === "published") query = query.eq("status", "published");
-  if (filter === "draft") query = query.eq("status", "draft");
+  if (filter === "draft") query = query.eq("status", "draft").is("scheduled_at", null);
+  if (filter === "scheduled") query = query.eq("status", "draft").not("scheduled_at", "is", null);
 
-  const { data: blogs } = await query;
+  const { data: rawBlogs } = await query;
+
+  const blogs = (rawBlogs ?? []).map((b) => ({
+    ...b,
+    displayStatus:
+      b.status === "draft" && b.scheduled_at && new Date(b.scheduled_at) > new Date()
+        ? "scheduled"
+        : b.status,
+  }));
 
   const tabs: { label: string; value: FilterStatus }[] = [
-    { label: "Latest 10", value: "all" },
+    { label: "All",       value: "all" },
     { label: "Published", value: "published" },
-    { label: "Drafts", value: "draft" },
+    { label: "Drafts",    value: "draft" },
+    { label: "Scheduled", value: "scheduled" },
   ];
 
   return (
@@ -46,8 +56,8 @@ export default async function AdminBlogListPage({
             Manage Blog
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Showing {blogs?.length ?? 0} post{blogs?.length !== 1 ? "s" : ""}
-            {filter !== "all" ? ` · ${filter}` : " · latest 10"}
+            {blogs.length} post{blogs.length !== 1 ? "s" : ""}
+            {filter !== "all" ? ` · ${filter}` : ""}
           </p>
         </div>
         <Link
@@ -60,7 +70,7 @@ export default async function AdminBlogListPage({
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 mb-5 bg-white/5 p-1 rounded-lg w-fit">
+      <div className="flex flex-wrap gap-1 mb-5 bg-white/5 p-1 rounded-lg w-fit">
         {tabs.map((tab) => (
           <Link
             key={tab.value}
@@ -76,7 +86,7 @@ export default async function AdminBlogListPage({
         ))}
       </div>
 
-      {!blogs?.length ? (
+      {!blogs.length ? (
         <div className="admin-card p-12 text-center">
           <p className="text-4xl mb-3" aria-hidden="true">📝</p>
           <p className="font-semibold text-white">No blog posts found</p>
@@ -110,9 +120,16 @@ export default async function AdminBlogListPage({
                       <Badge variant="default">{blog.category}</Badge>
                     </td>
                     <td className="px-4 py-3.5">
-                      <Badge variant={blog.status === "published" ? "success" : "warning"}>
-                        {blog.status}
-                      </Badge>
+                      {blog.displayStatus === "scheduled" ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          <Clock size={10} aria-hidden="true" />
+                          Scheduled
+                        </span>
+                      ) : (
+                        <Badge variant={blog.displayStatus === "published" ? "success" : "warning"}>
+                          {blog.displayStatus}
+                        </Badge>
+                      )}
                     </td>
                     <td className="px-4 py-3.5 hidden md:table-cell">
                       <span className="inline-flex items-center gap-1 text-slate-300 font-medium">
@@ -121,7 +138,16 @@ export default async function AdminBlogListPage({
                       </span>
                     </td>
                     <td className="px-4 py-3.5 text-slate-400 text-xs hidden md:table-cell">
-                      {blog.published_at ? formatDate(blog.published_at) : formatDate(blog.created_at)}
+                      {blog.displayStatus === "scheduled" && blog.scheduled_at ? (
+                        <span className="text-purple-300 flex items-center gap-1">
+                          <Clock size={10} />
+                          {formatDate(blog.scheduled_at)}
+                        </span>
+                      ) : blog.published_at ? (
+                        formatDate(blog.published_at)
+                      ) : (
+                        formatDate(blog.created_at)
+                      )}
                     </td>
                     <td className="px-5 py-3.5">
                       <div className="flex items-center justify-end gap-2">

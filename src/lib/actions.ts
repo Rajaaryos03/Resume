@@ -90,6 +90,22 @@ export async function upsertBlog(formData: FormData) {
     .filter(Boolean);
 
   const status = formData.get("status") as string;
+  const scheduledAtRaw = (formData.get("scheduledAt") as string) || null;
+
+  // Validate scheduled date
+  if (status === "scheduled") {
+    if (!scheduledAtRaw) return { error: "Publish date is required for scheduled posts." };
+    const scheduledDate = new Date(scheduledAtRaw);
+    if (isNaN(scheduledDate.getTime())) return { error: "Invalid publish date." };
+    if (scheduledDate <= new Date()) return { error: "Scheduled date must be in the future." };
+  }
+
+  // Scheduled posts are stored as 'draft' with scheduled_at set
+  // The cron job /api/cron/publish-scheduled will flip them to 'published' when the time comes
+  const dbStatus = status === "scheduled" ? "draft" : status;
+  const scheduledAt = status === "scheduled" && scheduledAtRaw
+    ? new Date(scheduledAtRaw).toISOString()
+    : null;
   const publishedAt =
     status === "published"
       ? (formData.get("publishedAt") as string) || new Date().toISOString()
@@ -103,8 +119,9 @@ export async function upsertBlog(formData: FormData) {
     category: formData.get("category") as string,
     tags,
     cover_image_url: (formData.get("coverImageUrl") as string) || null,
-    status,
+    status: dbStatus,
     published_at: publishedAt,
+    scheduled_at: scheduledAt,
     series_id: (formData.get("seriesId") as string) || null,
     series_order: formData.get("seriesOrder")
       ? parseInt(formData.get("seriesOrder") as string, 10)

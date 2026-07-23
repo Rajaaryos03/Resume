@@ -1,4 +1,4 @@
-export type BlogStatus = "draft" | "published";
+export type BlogStatus = "draft" | "published" | "scheduled";
 export type ContentStatus = "published" | "hidden";
 export type EmploymentType =
   | "full-time"
@@ -53,6 +53,7 @@ export interface Blog {
   coverImageUrl?: string;
   status: BlogStatus;
   publishedAt?: string;
+  scheduledAt?: string;
   viewCount: number;
   seriesId?: string;
   seriesOrder?: number;

@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import { cache } from "react";
 import type { Blog, BlogSeries, BlogSeriesWithPosts, Certificate, CV, Experience, Profile, Project } from "@/types";
 
 // ──────────────────────────────
 // PROFILE
 // ──────────────────────────────
-export async function getProfile(): Promise<Profile | null> {
+export const getProfile = cache(async (): Promise<Profile | null> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profile")
@@ -14,7 +15,7 @@ export async function getProfile(): Promise<Profile | null> {
     .single();
   if (!data) return null;
   return mapProfile(data);
-}
+});
 
 // ──────────────────────────────
 // BLOG (public)
@@ -210,6 +211,15 @@ function mapProfile(d: Record<string, unknown>): Profile {
 }
 
 function mapBlog(d: Record<string, unknown>): Blog {
+  const scheduledAt = d.scheduled_at as string | undefined;
+  const dbStatus = d.status as string;
+
+  // Derive display status: a draft post with a future scheduled_at is "scheduled"
+  const status: Blog["status"] =
+    dbStatus === "draft" && scheduledAt && new Date(scheduledAt) > new Date()
+      ? "scheduled"
+      : (dbStatus as Blog["status"]);
+
   return {
     id: d.id as string,
     title: d.title as string,
@@ -219,8 +229,9 @@ function mapBlog(d: Record<string, unknown>): Blog {
     category: d.category as Blog["category"],
     tags: (d.tags as string[]) ?? [],
     coverImageUrl: d.cover_image_url as string | undefined,
-    status: d.status as Blog["status"],
+    status,
     publishedAt: d.published_at as string | undefined,
+    scheduledAt,
     viewCount: (d.view_count as number) ?? 0,
     seriesId: d.series_id as string | undefined,
     seriesOrder: d.series_order as number | undefined,

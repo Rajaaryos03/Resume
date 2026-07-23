@@ -32,6 +32,14 @@ const MIGRATIONS: Record<string, string> = {
   availability_status: `
     ALTER TABLE profile ADD COLUMN IF NOT EXISTS availability_status text;
   `,
+  scheduled_publish: `
+    ALTER TABLE blog ADD COLUMN IF NOT EXISTS scheduled_at timestamptz;
+  `,
+  medium_integration: `
+    ALTER TABLE blog ADD COLUMN IF NOT EXISTS medium_guid text;
+    ALTER TABLE blog ADD COLUMN IF NOT EXISTS medium_url text;
+    CREATE UNIQUE INDEX IF NOT EXISTS blog_medium_guid_idx ON blog(medium_guid) WHERE medium_guid IS NOT NULL;
+  `,
 };
 
 export async function POST(req: NextRequest) {
