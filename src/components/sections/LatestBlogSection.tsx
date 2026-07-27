@@ -30,7 +30,7 @@ export default function LatestBlogSection({ blogs }: { blogs: Blog[] }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {blogs.map((blog, i) => (
           <ScrollReveal key={blog.id} variant="fade-up" delay={i * 100} threshold={0.1}>
-            <BlogCard blog={blog} featured={i === 0 && blogs.length > 2} />
+            <BlogCard blog={blog} />
           </ScrollReveal>
         ))}
       </div>
