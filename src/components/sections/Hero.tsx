@@ -30,8 +30,8 @@ export default function Hero({ profile, cv }: HeroProps) {
           {/* ── Text content ── */}
           <div className="flex-1 text-center md:text-left animate-fade-in">
             {profile.availabilityStatus && (
-              <div className="inline-flex items-center gap-2 bg-[#2F80ED]/20 border border-[#2F80ED]/30 text-[#56CCF2] text-sm font-medium px-3.5 py-1.5 rounded-full mb-5">
-                <span className="w-2 h-2 bg-[#10B981] rounded-full animate-pulse" aria-hidden="true" />
+              <div className="inline-flex items-start gap-2 bg-[#2F80ED]/20 border border-[#2F80ED]/30 text-[#56CCF2] text-sm font-medium px-3.5 py-1.5 rounded-full mb-5 max-w-xs whitespace-normal break-words text-left">
+                <span className="w-2 h-2 bg-[#10B981] rounded-full animate-pulse mt-1 shrink-0" aria-hidden="true" />
                 {profile.availabilityStatus}
               </div>
             )}

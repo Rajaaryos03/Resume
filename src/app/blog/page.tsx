@@ -45,12 +45,12 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         {/* Header */}
         <div className="mb-10">
           <h1
-            className="text-3xl sm:text-4xl font-bold text-[#1E293B] mb-2"
-            style={{ fontFamily: "var(--font-heading)" }}
+            className="text-3xl sm:text-4xl font-bold mb-2"
+            style={{ fontFamily: "var(--font-heading)", color: "#1E293B" }}
           >
             Blog
           </h1>
-          <p className="text-[#64748B]">
+          <p style={{ color: "#64748B" }}>
             Articles and insights on Power Platform, Microsoft 365, and productivity.
           </p>
           <div className="mt-3 h-1 w-12 rounded-full bg-[#2F80ED]" aria-hidden="true" />

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FileText,
@@ -11,6 +11,7 @@ import {
   FileUp,
   LogOut,
   ChevronRight,
+  ChevronLeft,
   Menu,
   X,
   FolderKanban,
@@ -41,7 +42,10 @@ const navItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const isSubPage = pathname !== "/admin";
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
@@ -117,13 +121,24 @@ export default function AdminSidebar() {
 
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[#0B1F3A] border-b border-white/10 px-4 h-14 flex items-center justify-between">
-        <Link
-          href="/admin"
-          className="text-white font-bold"
-          style={{ fontFamily: "var(--font-heading)" }}
-        >
-          Raja<span className="text-[#2F80ED]">.</span>admin
-        </Link>
+        <div className="flex items-center gap-2">
+          {isSubPage && (
+            <button
+              onClick={() => router.back()}
+              className="text-slate-300 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+              aria-label="Go back"
+            >
+              <ChevronLeft size={20} aria-hidden="true" />
+            </button>
+          )}
+          <Link
+            href="/admin"
+            className="text-white font-bold"
+            style={{ fontFamily: "var(--font-heading)" }}
+          >
+            Raja<span className="text-[#2F80ED]">.</span>admin
+          </Link>
+        </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="text-white p-2 rounded-lg hover:bg-white/10"
