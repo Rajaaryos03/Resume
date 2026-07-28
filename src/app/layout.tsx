@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import PublicShell from "@/components/layout/PublicShell";
-import Footer from "@/components/layout/Footer";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
@@ -69,7 +67,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col" style={{ fontFamily: "var(--font-body)" }}>
-        <PublicShell footer={<Footer />}>{children}</PublicShell>
+        {children}
         <Toaster
           position="top-right"
           toastOptions={{

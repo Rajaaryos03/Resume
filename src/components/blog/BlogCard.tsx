@@ -58,7 +58,7 @@ export default function BlogCard({ blog, featured }: BlogCardProps) {
 
         <Link href={`/blog/${blog.slug}`} className="group flex-1">
           <h3
-            className={`font-bold text-white group-hover:text-[#56CCF2] transition-colors leading-snug mb-2 ${
+            className={`font-bold text-black group-hover:text-[#56CCF2] transition-colors leading-snug mb-2 ${
               featured ? "text-xl" : "text-base"
             }`}
             style={{ fontFamily: "var(--font-heading)" }}

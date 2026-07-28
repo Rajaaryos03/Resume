@@ -42,9 +42,10 @@
   --shadow-lg: 0 10px 30px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.04);
 }
 
+/* Tailwind v4 theme tokens — scoped names to avoid preflight conflicts */
 @theme inline {
-  --color-background: var(--color-background);
-  --color-foreground: var(--color-text-primary);
+  --color-brand-bg: var(--color-background);
+  --color-brand-fg: var(--color-text-primary);
 }
 
 *,
