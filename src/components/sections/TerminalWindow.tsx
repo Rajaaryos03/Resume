@@ -8,11 +8,13 @@ interface TerminalWindowProps {
 }
 
 export default function TerminalWindow({ name, title, skills, status }: TerminalWindowProps) {
-  const displaySkills = skills.slice(0, 4);
-  const displayStatus = status || "open to work ✓";
+  const displaySkills = skills.slice(0, 3);
+  const rawStatus = status || "open to work ✓";
+  const displayStatus = rawStatus.length > 30 ? rawStatus.slice(0, 30).trimEnd() + "…" : rawStatus;
+  const shortTitle = title.length > 28 ? title.slice(0, 28).trimEnd() + "…" : title;
 
   return (
-    <div className="terminal-window w-full max-w-sm text-xs font-mono">
+    <div className="terminal-window w-full text-xs font-mono">
       {/* Title bar */}
       <div className="terminal-titlebar">
         <span className="terminal-dot dot-red" />
@@ -27,7 +29,7 @@ export default function TerminalWindow({ name, title, skills, status }: Terminal
           <span className="terminal-prompt">➜</span>{" "}
           <span className="terminal-cmd">whoami</span>
         </p>
-        <p className="terminal-output">{name} — {title}</p>
+        <p className="terminal-output">{name} — {shortTitle}</p>
 
         <p className="mt-2">
           <span className="terminal-prompt">➜</span>{" "}

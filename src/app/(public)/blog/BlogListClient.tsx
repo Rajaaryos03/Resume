@@ -180,7 +180,7 @@ export default function BlogListClient({
       ) : blogs.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-live="polite">
           {blogs.map((blog) => (
-            <BlogCard key={blog.id} blog={blog} />
+            <BlogCard key={blog.id} blog={blog} variant="light" />
           ))}
         </div>
       ) : (

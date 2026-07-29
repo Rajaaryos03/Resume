@@ -411,6 +411,8 @@ select option {
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(47,128,237,0.1);
   animation: terminalFloat 0.6s ease-out both, terminalBob 6s ease-in-out 1s infinite;
   will-change: transform;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 @keyframes terminalFloat {
@@ -451,9 +453,17 @@ select option {
 }
 
 .terminal-body {
-  padding: 14px 18px 18px;
-  line-height: 1.9;
+  padding: 10px 14px 14px;
+  line-height: 1.75;
   color: #c9d1d9;
+  overflow: hidden;
+}
+
+.terminal-body pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  font-size: 0.7rem;
 }
 
 .terminal-prompt { color: #2F80ED; font-weight: 700; margin-right: 6px; }

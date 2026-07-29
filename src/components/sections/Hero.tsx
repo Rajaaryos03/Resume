@@ -99,9 +99,9 @@ export default function Hero({ profile, cv }: HeroProps) {
           </div>
 
           {/* ── Right column: profile photo + terminal ── */}
-          <div className="flex-shrink-0 flex flex-col items-center gap-6 animate-fade-in" style={{ animationDelay: "0.15s" }}>
+          <div className="flex-shrink-0 flex flex-col items-center gap-5 animate-fade-in w-full md:w-[280px] lg:w-[300px]" style={{ animationDelay: "0.15s" }}>
             {/* Profile photo */}
-            <div className="relative w-52 h-52 sm:w-64 sm:h-64 md:w-72 md:h-72">
+            <div className="relative w-44 h-44 sm:w-52 sm:h-52 md:w-56 md:h-56">
               <div className="absolute inset-0 bg-gradient-to-br from-[#2F80ED] to-[#56CCF2] rounded-full opacity-20 blur-xl" aria-hidden="true" />
               <div className="relative w-full h-full rounded-full border-4 border-[#2F80ED]/40 overflow-hidden bg-[#102A43]">
                 {profile.profileImageUrl ? (
